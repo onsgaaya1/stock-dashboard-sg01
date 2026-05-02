@@ -28,8 +28,7 @@ def load_data():
     if not os.path.exists(local_path):
         import gdown
         st.info("Telechargement du dataset depuis Google Drive (3350 MB — ~5 min)...")
-        url = f"https://drive.google.com/uc?id={file_id}"
-        gdown.download(url, local_path, quiet=False, fuzzy=True)
+        gdown.download(id=file_id, output=local_path, quiet=False)
 
     # Lecture par chunks — recupere TOUTES les donnees pour nos 15 tickers
     # Periode couverte : 1962-01-02 -> 2024-11-04 (140 429 lignes)
