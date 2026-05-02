@@ -22,7 +22,7 @@ def load_data():
     # Exemple URL : https://drive.google.com/file/d/XXXXXXXXXXXXXXX/view
     # L'ID est la partie XXXXXXXXXXXXXXX
     # ═══════════════════════════════════════════════════════
-    file_id   = "17GFmaHT1o6oMHgV8Uu9tGHHAnp8v08YG"   # <-- CHANGE THIS to your full CSV file ID
+    file_id   = "1pynCBxcG9UN5SWlE2fyiLE4hVpc9xyEo"   # full 3350 MB CSV — all 15 tickers 1962-2024
     local_path = "all_stock_data.csv"
 
     if not os.path.exists(local_path):
