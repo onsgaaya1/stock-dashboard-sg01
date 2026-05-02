@@ -14,8 +14,10 @@ st.markdown("---")
 
 @st.cache_data
 def load_data():
-    # Chargement CSV — 600 000 lignes pour couvrir les 15 tickers selectionnes
-    df = pd.read_csv("all_stock_data.csv", nrows=600000)
+    # Chargement CSV depuis Google Drive (fichier public)
+    file_id = "17GFmaHT1o6oMHgV8Uu9tGHHAnp8v08YG"
+    url = f"https://drive.google.com/uc?export=download&id={file_id}"
+    df = pd.read_csv(url, nrows=600000)
     df["Date"] = pd.to_datetime(df["Date"])
     df = df.rename(columns={"Stock Splits": "Stock_Splits"})
     df = df.drop(columns=["Dividends", "Stock_Splits"], errors="ignore")
