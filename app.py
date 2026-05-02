@@ -108,18 +108,30 @@ TICKERS = sorted(df["Ticker"].unique())
 
 # ── Sidebar ──────────────────────────────────────────────
 st.sidebar.header("Parametres")
-ticker   = st.sidebar.selectbox("Choisir un ticker :", TICKERS,
-                                 index=TICKERS.index("AAPL") if "AAPL" in TICKERS else 0)
+ticker = st.sidebar.selectbox("Choisir un ticker :", TICKERS,
+                               index=TICKERS.index("AAPL") if "AAPL" in TICKERS else 0)
 
-date_min = df["Date"].min().date()
-date_max = df["Date"].max().date()
+# Date range for THIS ticker only
+ticker_df  = df[df["Ticker"] == ticker]
+date_min   = ticker_df["Date"].min().date()
+date_max   = ticker_df["Date"].max().date()
 
-# Default : show last 5 years of available data
-default_start = max(date_min, (df["Date"].max() - pd.DateOffset(years=5)).date())
+# Default : last 5 years of THIS ticker's data
+default_start = max(date_min, (ticker_df["Date"].max() - pd.DateOffset(years=5)).date())
+
+# Button to show all history for this ticker
+if st.sidebar.button("Toute la periode disponible"):
+    selected_start = date_min
+    selected_end   = date_max
+else:
+    selected_start = default_start
+    selected_end   = date_max
 
 start, end = st.sidebar.date_input(
-    "Periode :", [default_start, date_max],
+    "Periode :", [selected_start, selected_end],
     min_value=date_min, max_value=date_max)
+
+st.sidebar.caption(f"Donnees disponibles pour {ticker} : {date_min} → {date_max}")
 
 df_t = df[
     (df["Ticker"] == ticker) &
