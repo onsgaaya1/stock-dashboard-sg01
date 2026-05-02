@@ -21,16 +21,22 @@ def load_data():
         import gdown
         gdown.download(id=file_id, output=local_path, quiet=False)
 
-    # Load last 600k rows to get the most recent data instead of oldest
-    df = pd.read_csv(local_path)
-    df = df.tail(600000)
+    # Scan full CSV in chunks, keep only our 15 tickers → all their history
+    TICKERS = ["AAPL","MSFT","GOOGL","AMZN","TSLA","META","NVDA",
+               "JPM","BAC","GS","XOM","WMT","KO","PFE","NFLX"]
+    chunks = []
+    for chunk in pd.read_csv(local_path, chunksize=100000):
+        filtered = chunk[chunk["Ticker"].isin(TICKERS)]
+        if not filtered.empty:
+            chunks.append(filtered)
+    df = pd.concat(chunks, ignore_index=True)
+
     df["Date"] = pd.to_datetime(df["Date"])
     df = df.rename(columns={"Stock Splits": "Stock_Splits"})
     df = df.drop(columns=["Dividends", "Stock_Splits"], errors="ignore")
 
-    TICKERS = ["AAPL","MSFT","GOOGL","AMZN","TSLA","META","NVDA",
-               "JPM","BAC","GS","XOM","WMT","KO","PFE","NFLX"]
-    df = df[df["Ticker"].isin(TICKERS)].copy()
+    # Keep data from 2010 onwards → ~25,000+ rows, fast & recent
+    df = df[df["Date"] >= pd.Timestamp("2010-01-01")].copy()
     df = df.sort_values(["Ticker","Date"]).reset_index(drop=True)
     df = df[(df["Close"] > 0) & (df["Volume"] >= 0)].dropna(subset=["Open","High","Low","Close","Volume"])
 
@@ -89,7 +95,7 @@ st.sidebar.header("Parametres")
 ticker   = st.sidebar.selectbox("Choisir un ticker :", sorted(df["Ticker"].unique()), index=0)
 date_min = df["Date"].min().date()
 date_max = df["Date"].max().date()
-default_start = max(date_min, (pd.Timestamp(date_max) - pd.DateOffset(years=3)).date())
+default_start = max(date_min, (pd.Timestamp(date_max) - pd.DateOffset(years=5)).date())
 start, end = st.sidebar.date_input("Periode :", [default_start, date_max], min_value=date_min, max_value=date_max)
 
 df_t = df[(df["Ticker"]==ticker) & (df["Date"]>=pd.Timestamp(start)) & (df["Date"]<=pd.Timestamp(end))].sort_values("Date")
