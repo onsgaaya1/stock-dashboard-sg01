@@ -6,6 +6,7 @@ import seaborn as sns
 from sklearn.linear_model    import LinearRegression
 from sklearn.preprocessing   import StandardScaler
 from sklearn.metrics         import mean_absolute_error, mean_squared_error, r2_score
+import os
 
 st.set_page_config(page_title="Stock Dashboard SG01", layout="wide")
 st.title("Tableau de Bord Boursier - SG01 Finance & Trading")
@@ -14,10 +15,15 @@ st.markdown("---")
 
 @st.cache_data
 def load_data():
-    # Chargement CSV depuis Google Drive (fichier public)
     file_id = "17GFmaHT1o6oMHgV8Uu9tGHHAnp8v08YG"
-    url = f"https://drive.google.com/uc?export=download&id={file_id}"
-    df = pd.read_csv(url, nrows=600000)
+    local_path = "all_stock_data.csv"
+
+    # Download with gdown if not already cached
+    if not os.path.exists(local_path):
+        import gdown
+        gdown.download(id=file_id, output=local_path, quiet=False)
+
+    df = pd.read_csv(local_path, nrows=600000)
     df["Date"] = pd.to_datetime(df["Date"])
     df = df.rename(columns={"Stock Splits": "Stock_Splits"})
     df = df.drop(columns=["Dividends", "Stock_Splits"], errors="ignore")
